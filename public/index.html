@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LetterCraft AI | Smart Cover Letter Generator</title>
+    <meta name="description" content="Generate tailored, professional cover letters in seconds using Gemini AI or smart template fallback.">
+    <!-- Google Fonts: Outfit (headings) and Inter (body) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- Top Navigation Bar -->
+    <header class="navbar">
+        <a class="brand" href="/">
+            <div class="brand-badge">✦</div>
+            LetterCraft <span>AI</span>
+        </a>
+        <div class="nav-right">
+            <div id="serverStatus" class="status checking" title="Checking server connection">
+                <i class="status-dot"></i>
+                <span id="serverStatusText">Connecting...</span>
+            </div>
+            <button id="themeBtn" class="icon-btn" aria-label="Toggle dark/light mode" title="Toggle theme">☀️</button>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="eyebrow-container">
+                <span class="eyebrow">✦ NEXT-GEN CAREER ASSISTANT</span>
+            </div>
+            <h1>Land your dream role with<br><span class="gradient-text">the perfect cover letter.</span></h1>
+            <p>Generate highly tailored, professional letters powered by Google Gemini AI with instant template fallback.</p>
+        </section>
+
+        <!-- Live Server / Port Warning Banner (hidden by default, shown if accessed via wrong port) -->
+        <div id="serverNotice" class="server-notice" hidden>
+            <div class="notice-icon">⚠️</div>
+            <div class="notice-body">
+                <strong>Backend connection needed:</strong>
+                <span id="serverNoticeText">Please ensure the backend server is running with <code>npm start</code> at <a href="http://localhost:3000" target="_blank">http://localhost:3000</a>.</span>
+            </div>
+            <button type="button" id="dismissNoticeBtn" class="notice-close" aria-label="Dismiss">✕</button>
+        </div>
+
+        <div class="workspace">
+            <!-- Left Panel: Input Form -->
+            <section class="panel form-panel">
+                <div class="panel-header">
+                    <div class="panel-heading">
+                        <span class="step-badge">01</span>
+                        <div>
+                            <h2>Your details</h2>
+                            <p>Tell us about the opportunity you're targeting.</p>
+                        </div>
+                    </div>
+                    <button type="button" id="fillDemoBtn" class="ghost-btn" title="Populate sample inputs to test quickly">
+                        ✦ Fill sample data
+                    </button>
+                </div>
+
+                <form id="letterForm">
+                    <div class="form-group">
+                        <label for="name">
+                            Full name <span class="required">*</span>
+                        </label>
+                        <input id="name" name="name" placeholder="e.g. Alex Morgan" required maxlength="100" autocomplete="name">
+                    </div>
+
+                    <div class="two-columns">
+                        <div class="form-group">
+                            <label for="role">
+                                Target role <span class="required">*</span>
+                            </label>
+                            <input id="role" name="role" placeholder="e.g. Senior Frontend Engineer" required maxlength="150">
+                        </div>
+                        <div class="form-group">
+                            <label for="company">
+                                Company name <span class="required">*</span>
+                            </label>
+                            <input id="company" name="company" placeholder="e.g. Acme Corp" required maxlength="150">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="label-with-counter">
+                            <label for="skills">
+                                Key skills & strengths <span class="required">*</span>
+                            </label>
+                            <span id="skillsCounter" class="char-counter">0/2000</span>
+                        </div>
+                        <textarea id="skills" name="skills" rows="3" maxlength="2000"
+                            placeholder="e.g. React, TypeScript, Node.js, System Architecture, Team Mentorship..." required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="label-with-counter">
+                            <label for="jobDescription">
+                                Job description <span class="optional">Recommended</span>
+                            </label>
+                            <span id="jobDescCounter" class="char-counter">0/6000</span>
+                        </div>
+                        <textarea id="jobDescription" name="jobDescription" rows="4" maxlength="6000"
+                            placeholder="Paste the key responsibilities or requirements from the job posting..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Resume PDF <span class="optional">Optional · Max 3 MB</span></label>
+                        <div id="dropZone" class="upload-box" tabindex="0" role="button" aria-label="Upload resume PDF">
+                            <div class="upload-icon-wrapper">
+                                <span class="upload-icon">📄</span>
+                            </div>
+                            <div class="upload-text">
+                                <strong id="fileName">Upload your resume</strong>
+                                <small id="fileDetails">Click or drag & drop a PDF file here (Max 3 MB)</small>
+                            </div>
+                            <button type="button" id="removeFileBtn" class="remove-file-btn" hidden title="Remove file" aria-label="Remove attached PDF">✕</button>
+                        </div>
+                        <input type="file" id="resume" accept=".pdf,application/pdf" hidden>
+                    </div>
+
+                    <button type="submit" id="generateBtn" class="primary-btn generate-btn">
+                        <span id="btnText">✦ Generate cover letter</span>
+                        <span class="btn-arrow">→</span>
+                    </button>
+
+                    <div class="privacy-note">
+                        <span class="lock-icon">🔒</span>
+                        <span>Your API key and data stay securely on the server.</span>
+                    </div>
+
+                    <div id="message" class="message-banner" role="status" aria-live="polite" hidden></div>
+                </form>
+            </section>
+
+            <!-- Right Panel: Generated Output -->
+            <section class="panel result-panel">
+                <div class="panel-header">
+                    <div class="panel-heading">
+                        <span class="step-badge">02</span>
+                        <div>
+                            <h2>Your cover letter</h2>
+                            <p>Tailored and formatted for immediate use.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Empty State Placeholder -->
+                <div id="emptyState" class="empty-state">
+                    <div class="document-illustration">
+                        <div class="doc-icon">✧</div>
+                        <div class="doc-line short"></div>
+                        <div class="doc-line long"></div>
+                        <div class="doc-line medium"></div>
+                    </div>
+                    <h3>Ready when you are</h3>
+                    <p>Fill out your details on the left, click <strong>Generate</strong>, and your customized letter will appear right here.</p>
+                </div>
+
+                <!-- Loading State Skeleton -->
+                <div id="loadingState" class="loading-state" hidden>
+                    <div class="ai-sparkle">✦</div>
+                    <h3 id="loadingTitle">Crafting your cover letter...</h3>
+                    <p id="loadingTip" class="loading-tip">Analyzing your skills and target role requirements...</p>
+                    <div class="skeleton-wrapper">
+                        <div class="skeleton-line full"></div>
+                        <div class="skeleton-line full"></div>
+                        <div class="skeleton-line medium"></div>
+                        <div class="skeleton-line space"></div>
+                        <div class="skeleton-line full"></div>
+                        <div class="skeleton-line full"></div>
+                        <div class="skeleton-line short"></div>
+                    </div>
+                </div>
+
+                <!-- Output Area (shown after generation) -->
+                <div id="resultArea" hidden>
+                    <div class="result-toolbar">
+                        <div class="result-toolbar-left">
+                            <span class="result-tag">✦ GENERATED LETTER</span>
+                            <span id="modeLabel" class="mode-label">✦ Gemini AI</span>
+                        </div>
+                        <div class="letter-stats">
+                            <span id="wordCount">0 words</span>
+                            <span>·</span>
+                            <span id="readTime">1 min read</span>
+                        </div>
+                    </div>
+
+                    <div id="warningNotice" class="warning-callout" hidden>
+                        <span class="warning-icon">ℹ️</span>
+                        <span id="warningText">Generated using template fallback.</span>
+                    </div>
+
+                    <article id="letterOutput" class="letter-output" contenteditable="true" spellcheck="false" title="Click to make quick edits"></article>
+
+                    <div class="result-actions">
+                        <button type="button" id="copyBtn" class="primary-btn action-btn">
+                            <span id="copyBtnIcon">📋</span>
+                            <span id="copyBtnText">Copy letter</span>
+                        </button>
+                        <button type="button" id="downloadBtn" class="secondary-btn action-btn">
+                            <span>💾</span>
+                            <span>Download .txt</span>
+                        </button>
+                        <button type="button" id="printBtn" class="secondary-btn action-btn" title="Print or save as PDF">
+                            <span>🖨️</span>
+                            <span>Print / PDF</span>
+                        </button>
+                    </div>
+                    <p id="copyMessage" class="feedback-toast" role="status" aria-live="polite" hidden></p>
+                </div>
+            </section>
+        </div>
+
+        <footer>
+            LetterCraft AI · Built for Prodesk IT Sprint 4 · Powered by Google Gemini & Express
+        </footer>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
